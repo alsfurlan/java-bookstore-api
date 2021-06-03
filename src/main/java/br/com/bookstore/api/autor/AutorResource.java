@@ -12,6 +12,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import static javax.ws.rs.core.Response.Status;
@@ -32,7 +33,14 @@ public class AutorResource {
     public AutorResource() {}
 
     @GET
-    public List<Autor> getAutores() {
+    public List<Autor> getAutores(@QueryParam("nome") String nome) {
+        if(nome != null) {
+           return entityManager
+//                   .createNativeQuery("SELECT * FROM autores WHERE nome=:nome") - SQL
+                   .createQuery("SELECT a FROM Autor a WHERE LOWER(a.nome) LIKE :nome", Autor.class) // JPQL
+                   .setParameter("nome", "%" + nome.toLowerCase() + "%")
+                   .getResultList();
+        }
 //        return entityManager
 //                .createNativeQuery("SELECT * FROM autores", Autor.class)
 //                .getResultList(); - SQL
