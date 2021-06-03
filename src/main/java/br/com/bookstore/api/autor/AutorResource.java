@@ -1,10 +1,9 @@
 package br.com.bookstore.api.autor;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -24,26 +23,28 @@ import static javax.ws.rs.core.Response.Status;
 @Path("autores")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Stateless
 public class AutorResource {
 
-    static List<Autor> autores = new ArrayList<>(
-        Arrays.asList(
-            new Autor(1, "David Cockford", LocalDate.of(1959, Month.MARCH, 1), Genero.MASCULINO),
-            new Autor(2, "JK Rowling", LocalDate.of(1953, Month.MARCH, 1), Genero.FEMININO)
-        )
-    );
-
+    @PersistenceContext(unitName = "BookstorePU")
+    private EntityManager entityManager;
+    
     public AutorResource() {}
 
     @GET
     public List<Autor> getAutores() {
-        return autores;
+//        return entityManager
+//                .createNativeQuery("SELECT * FROM autores", Autor.class)
+//                .getResultList(); - SQL
+        return entityManager
+                .createQuery("SELECT a FROM Autor a", Autor.class) // JPQL
+                .getResultList();
     }
 
     @GET
     @Path("{id}")
     public Response getAutor(@PathParam("id") int id) {
-        Autor autor = findAutor(id);
+        Autor autor = findAutor(id);        
         if (autor == null) {
             return autorNotFoundResponse();
         }
@@ -52,9 +53,7 @@ public class AutorResource {
 
     @POST
     public Response addAutor(Autor autor) {
-        int ultimoId = autores.get(autores.size()-1).getId();
-        autor.setId(++ultimoId);
-        autores.add(autor);
+        entityManager.persist(autor);
         return Response.status(Status.CREATED).entity(autor).build();
     }
 
@@ -65,7 +64,7 @@ public class AutorResource {
         if(autor == null) {
             return autorNotFoundResponse();
         } 
-        autores.remove(autor);
+        entityManager.remove(autor);
 //        return Response.status(Status.NO_CONTENT).build();
         return Response.noContent().build();
     }
@@ -77,18 +76,13 @@ public class AutorResource {
         if(autor == null) {
             return autorNotFoundResponse();
         }
-        autor.setNome(autorAtualizado.getNome());
-        autor.setDataNascimento(autorAtualizado.getDataNascimento());
-        autor.setGenero(autorAtualizado.getGenero());
+        autorAtualizado.setId(id);
+        entityManager.merge(autorAtualizado);
         return Response.ok(autor).build();
     }
     
     public Autor findAutor(int id) {
-        return autores
-                .stream()
-                .filter(a -> a.getId() == id)
-                .findFirst()
-                .orElse(null);        
+        return entityManager.find(Autor.class, id);
     }
     
     public Response autorNotFoundResponse() {      

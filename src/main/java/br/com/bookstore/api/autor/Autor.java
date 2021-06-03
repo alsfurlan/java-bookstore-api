@@ -1,34 +1,39 @@
 package br.com.bookstore.api.autor;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  *
  * @author aula
  */
-public class Autor {
+@Entity
+@Table(name = "autores", schema="public")
+public class Autor implements Serializable {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
+    
+    @Column(nullable = false)
     private String nome;
+    
+    @Column(name = "data_nascimento")
     private LocalDate dataNascimento;
+    
+    @Enumerated(EnumType.STRING)
     private Genero genero;   
 
     public Autor() {
     }
-
-    public Autor(String nome, LocalDate dataNascimento, Genero genero) {
-        this.nome = nome;
-        this.dataNascimento = dataNascimento;
-        this.genero = genero;
-    }
-
-    public Autor(int id, String nome, LocalDate dataNascimento, Genero genero) {
-        this.id = id;
-        this.nome = nome;
-        this.dataNascimento = dataNascimento;
-        this.genero = genero;
-    }
-
     
     public int getId() {
         return id;
