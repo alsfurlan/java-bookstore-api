@@ -2,14 +2,18 @@ package br.com.bookstore.api.livro;
 
 import br.com.bookstore.api.autor.Autor;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -24,17 +28,23 @@ public class Livro implements Serializable {
     private String titulo;
     
     private String subtitulo;
+    
+    @OneToMany(fetch = FetchType.EAGER)    
+    @JoinTable(
+        name = "livro_autor",
+        joinColumns = @JoinColumn(name = "id_livro"),
+        inverseJoinColumns = @JoinColumn(name = "id_autor"),
+        foreignKey = @ForeignKey(name = "fk_livro"),
+        inverseForeignKey = @ForeignKey(name = "fk_autor")
+    )
+    private List<Autor> autores = new ArrayList<>();
 
-    @OneToOne
-    @JoinColumn(name = "id_autor", foreignKey = @ForeignKey(name = "fk_autor"))
-    private Autor autor;
-
-    public Autor getAutor() {
-        return autor;
+    public List<Autor> getAutores() {
+        return autores;
     }
 
-    public void setAutor(Autor autor) {
-        this.autor = autor;
+    public void setAutores(List<Autor> autores) {
+        this.autores = autores;
     }
     
     public Long getId() {
