@@ -1,11 +1,15 @@
 package br.com.bookstore.api.livro;
 
+import br.com.bookstore.api.autor.Autor;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -21,6 +25,18 @@ public class Livro implements Serializable {
     
     private String subtitulo;
 
+    @OneToOne
+    @JoinColumn(name = "id_autor", foreignKey = @ForeignKey(name = "fk_autor"))
+    private Autor autor;
+
+    public Autor getAutor() {
+        return autor;
+    }
+
+    public void setAutor(Autor autor) {
+        this.autor = autor;
+    }
+    
     public Long getId() {
         return id;
     }
